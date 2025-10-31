@@ -5,6 +5,7 @@ class IsometricObject {
         this.gridY = gridY;
         this.offset = offset;
         this.src = src;
+        this.spriteLayer = 0;
         this.image = new Image();
         this.image.src = src;
         this.loaded = false;
@@ -53,9 +54,16 @@ class ObjectManager {
     }
 
     drawObjects(ctx, screenCenterX, screenCenterY, tileHeight, gridToIso) {
-        const sorted = [...this.objects].sort(
-            (a, b) => a.gridX + a.gridY - (b.gridX + b.gridY)
-        );
+        const sorted = [...this.objects].sort((a, b) => {
+            const layerA = a.spriteLayer !== undefined ? a.spriteLayer : 0;
+            const layerB = b.spriteLayer !== undefined ? b.spriteLayer : 0;
+            if (layerA !== layerB) {
+                return layerA - layerB;
+            }
+            const depthA = a.gridX + a.gridY + (a.heightTiles || 0);
+            const depthB = b.gridX + b.gridY + (b.heightTiles || 0);
+            return depthA - depthB;
+        });
         sorted.forEach(obj =>
             obj.draw(ctx, screenCenterX, screenCenterY, tileHeight, gridToIso)
         );
