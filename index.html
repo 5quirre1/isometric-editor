@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>swag iso editor</title>
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+
+<body>
+    <div id="sidebar">
+        <div class="sidebar-header">swag.</div>
+        <div class="sidebar-content">
+
+            <div class="panel">
+                <div class="panel-header">world</div>
+                <div class="panel-body">
+                    <div class="field">
+                        <div class="field-label">map dimensions</div>
+                        <div class="field-row">
+                            <input type="number" id="mapWidth" placeholder="Width" value="10" min="1" max="50">
+                            <input type="number" id="mapHeight" placeholder="Height" value="10" min="1" max="50">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">tile dimensions</div>
+                        <div class="field-row">
+                            <input type="number" id="tileWidth" placeholder="Width" value="64" min="16">
+                            <input type="number" id="tileHeight" placeholder="Height" value="32" min="8">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">wall height</div>
+                        <input type="number" id="wallHeight" value="80" min="0">
+                    </div>
+                    <div class="field">
+                        <div class="field-label">ground color1</div>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="groundColor1" value="#d2b48c">
+                            <input type="text" id="groundColor1Text" value="#d2b48c">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">ground color2</div>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="groundColor2" value="#bfa078">
+                            <input type="text" id="groundColor2Text" value="#bfa078">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">wall color</div>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="wallColor" value="#d2b48c">
+                            <input type="text" id="wallColorText" value="#d2b48c">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">wall shade</div>
+                        <div class="color-input-wrapper">
+                            <input type="color" id="wallShade" value="#977b56">
+                            <input type="text" id="wallShadeText" value="#977b56">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="applyWorldSettings">apply</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">skybox</div>
+                <div class="panel-body">
+                    <div class="file-upload-btn">
+                        <input type="file" id="skyboxUpload" accept="image/*">
+                        <label for="skyboxUpload" class="upload-label">upload</label>
+                    </div>
+                    <div id="skyboxPreview" style="display: none; margin-top: 8px;">
+                        <img style="width: 100%; border: 1px solid #1e1e1e;">
+                    </div>
+                    <button class="btn btn-danger" id="clearSkybox" style="margin-top: 8px;">clear</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">sprites</div>
+                <div class="panel-body">
+                    <div class="file-upload-btn">
+                        <input type="file" id="spriteUpload" accept="image/*">
+                        <label for="spriteUpload" class="upload-label">add</label>
+                    </div>
+                    <div class="sprite-grid" id="spriteLibrary">
+                        <div class="info-text" style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                            no sprites loaded.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">scene objs</div>
+                <div class="panel-body">
+                    <div class="object-list" id="objectList">
+                        <div class="info-text" style="padding: 20px; text-align: center;">
+                            no objects in scene.
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" id="clearObjects">clear all objects</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">project</div>
+                <div class="panel-body">
+                    <button class="btn btn-primary" id="exportProject">export</button>
+                    <div class="file-upload-btn" style="margin-top: 8px;">
+                        <input type="file" id="importProject" accept=".swag,.json">
+                        <label for="importProject" class="upload-label">import</label>
+                    </div>
+                    <div class="info-text" style="margin-top: 8px;">
+                        projects are saved as .swag files
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="canvasArea">
+        <div id="toolbar">
+            <div class="toolbar-group">
+                <button class="tool-btn active" id="placeTool">place</button>
+                <button class="tool-btn" id="selectTool">select</button>
+                <button class="tool-btn" id="deleteTool">delete</button>
+            </div>
+            <div class="toolbar-group">
+                <label class="checkbox-field">
+                    <input type="checkbox" id="gridSnap" checked>
+                    <span style="font-size: 11px;">grid snap</span>
+                </label>
+            </div>
+        </div>
+        <div id="canvasContainer">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+    </div>
+
+    <script src="assets/js/object.js"></script>
+    <script src="assets/js/world.js"></script>
+    <script src="assets/js/camera.js"></script>
+    <script src="assets/js/editor.js"></script>
+</body>
+
+</html>
