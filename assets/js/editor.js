@@ -138,7 +138,11 @@ const editor = {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         const gridPos = this.screenToGrid(x, y);
-        const obj = objectManager.objects.find(o => o.gridX === Math.round(gridPos.x) && o.gridY === Math.round(gridPos.y));
+        const tolerance = 0.5;
+        const obj = objectManager.objects.find(o =>
+            Math.abs(o.gridX - gridPos.x) < tolerance &&
+            Math.abs(o.gridY - gridPos.y) < tolerance
+        );
         if (obj) {
             this.draggingObject = obj;
             this.selectedObject = obj.id;
@@ -202,17 +206,22 @@ const editor = {
             container.innerHTML = '<div class="info-text" style="grid-column: 1/-1; text-align: center; padding: 20px;">no sprites loaded., upload sprites to begin</div>';
             return;
         }
-        this.sprites.forEach(sprite => {
+
+        this.sprites.forEach((sprite, index) => {
             const item = document.createElement('div');
             item.className = 'sprite-item';
+            item.draggable = true;
             if (this.selectedSprite === sprite.id) item.classList.add('selected');
+
             const img = document.createElement('img');
             img.src = sprite.src;
             item.appendChild(img);
+
             const name = document.createElement('div');
             name.className = 'sprite-item-name';
             name.textContent = sprite.name;
             item.appendChild(name);
+
             const actions = document.createElement('div');
             actions.className = 'sprite-item-actions';
             const renameBtn = document.createElement('img');
@@ -248,6 +257,7 @@ const editor = {
                 name.addEventListener('keydown', onEnter);
             });
             actions.appendChild(renameBtn);
+
             const deleteBtn = document.createElement('img');
             deleteBtn.src = 'assets/img/delete.png';
             deleteBtn.className = 'sprite-action-btn';
@@ -257,13 +267,36 @@ const editor = {
                 this.sprites = this.sprites.filter(s => s.id !== sprite.id);
                 if (this.selectedSprite === sprite.id) this.selectedSprite = null;
                 this.updateSpriteLibrary();
+                this.updateAllSpriteLayers();
             });
             actions.appendChild(deleteBtn);
             item.appendChild(actions);
+
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', index);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+
+            item.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIndex = index;
+                const moved = this.sprites.splice(fromIndex, 1)[0];
+                this.sprites.splice(toIndex, 0, moved);
+                this.updateSpriteLibrary();
+                this.updateAllSpriteLayers();
+            });
+
             item.addEventListener('click', () => {
                 this.selectedSprite = (this.selectedSprite === sprite.id) ? null : sprite.id;
                 this.updateSpriteLibrary();
             });
+
             container.appendChild(item);
         });
     },
@@ -274,7 +307,12 @@ const editor = {
             container.innerHTML = '<div class="info-text" style="padding: 20px; text-align: center;">No objects in scene</div>';
             return;
         }
-        objectManager.objects.forEach(obj => {
+        const sortedObjects = [...objectManager.objects].sort((a, b) => {
+            const layerA = a.spriteLayer !== undefined ? a.spriteLayer : -1;
+            const layerB = b.spriteLayer !== undefined ? b.spriteLayer : -1;
+            return layerA - layerB;
+        });
+        sortedObjects.forEach(obj => {
             const sprite = this.sprites.find(s => s.id === obj.spriteId);
             const spriteName = sprite ? sprite.name : 'Unknown';
             const item = document.createElement('div');
@@ -299,6 +337,15 @@ const editor = {
             });
             container.appendChild(item);
         });
+    },
+    updateAllSpriteLayers() {
+        objectManager.objects.forEach(obj => {
+            const spriteIndex = this.sprites.findIndex(s => s.id === obj.spriteId);
+            if (spriteIndex !== -1) {
+                obj.spriteLayer = spriteIndex;
+            }
+        });
+        this.updateObjectList();
     },
     setTool(tool) {
         this.currentTool = tool;
@@ -359,8 +406,10 @@ const editor = {
         }
         const sprite = this.sprites.find(s => s.id === this.selectedSprite);
         if (!sprite) return;
+        const spriteLayer = this.sprites.findIndex(s => s.id === this.selectedSprite);
         const obj = objectManager.addObject(gridX, gridY, sprite.src);
         obj.spriteId = this.selectedSprite;
+        obj.spriteLayer = spriteLayer;
         obj.freePlacement = !this.gridSnap;
         this.updateObjectList();
     },
@@ -419,6 +468,7 @@ const editor = {
                 gridX: o.gridX,
                 gridY: o.gridY,
                 spriteId: o.spriteId,
+                spriteLayer: o.spriteLayer,
                 src: o.src,
                 offset: o.offset
             })),
@@ -470,6 +520,7 @@ const editor = {
                         const obj = objectManager.addObject(objData.gridX, objData.gridY, objData.src, objData.offset);
                         obj.id = objData.id;
                         obj.spriteId = objData.spriteId;
+                        obj.spriteLayer = objData.spriteLayer !== undefined ? objData.spriteLayer : 0;
                     });
                 }
                 if (project.skybox) {
