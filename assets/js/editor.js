@@ -112,6 +112,7 @@ const editor = {
             this.gridSnap = e.target.checked;
         });
 
+        document.getElementById('clearObjects').addEventListener('click', () => this.clearAllObjects());
         canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
         canvas.addEventListener('mousemove', (e) => {
             this.handleCanvasMove(e);
