@@ -113,7 +113,12 @@ const editor = {
         });
 
         canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
-        canvas.addEventListener('mousemove', (e) => this.handleCanvasMove(e));
+        canvas.addEventListener('mousemove', (e) => {
+            this.handleCanvasMove(e);
+            if (this.currentTool === 'select') {
+                this.dragObject(e);
+            }
+        });
         canvas.addEventListener('mouseleave', () => {
             ghostObject = null;
         });
@@ -650,4 +655,4 @@ const editor = {
         e.target.value = '';
     }
 };
-editor.init();
+editor.init()
